@@ -1,47 +1,42 @@
 # ProcurePilot AI
 
-Multi-Agent Procurement Intelligence & Strategic Sourcing Platform. Built for Faris Mohamed Kishtah's INSTANT AI Sprint 4 Project 5 assignment.
+Evidence-first multi-agent procurement research for Faris Mohamed Kishtah's INSTANT AI Sprint 4 Project 5. **Academic status: PARTIAL.** NileTech Operations is a fictional example buyer.
 
-## Current status
+## Verified result
 
-**Partial.** A genuine six-agent CrewAI sequential run completed locally on Ollama, but no Tavily key was present and no permitted supplier listings were collected. The model made zero calls to its offered CrewAI evidence tool. The included HTML report therefore makes **no purchase recommendation**. See `PROJECT_STATUS.md` and the real trace in the submission package. NileTech Operations is a fictional example company, not a real buyer.
+A live, permission-reviewed Egyptian catalog page yielded five current HC-05 module offers from five shops. In run `ba0e0163e5f8`, six sequential CrewAI tasks completed in 53.92 seconds using local Ollama. The sourcing agent invoked `catalog_source_lookup` once. The small model omitted the required extraction and assessment tool calls; guardrails invoked those deterministic functions in the orchestrator after retries, and the trace labels them separately. All five offers require supplier, configuration, quantity, warranty, shipping, and tax confirmation. **No purchase recommendation is made.** The original 10-laptop request remains unverified.
+
+The catalog observations were 195 EGP (Makers Electronics), 195 EGP (Ampere Electronics), 205 EGP (Most Electronic), 250 EGP (3D Smart Shop), and 295 EGP (RAM Electronics), observed on 21 November 2026. See [source validation](docs/REAL_SOURCING_VALIDATION.md) and the [final run record](docs/FINAL_PROCUREMENT_RUN.md) for source links and limits.
 
 ## Architecture
 
-`Request -> Tavily search or reviewed seed URLs -> permission-gated HTML fetch -> literal JSON-LD extraction -> Pydantic evidence -> deterministic eligibility and scoring -> six CrewAI tasks -> offline HTML report -> Streamlit dashboard -> SQLite`
+`Request -> bounded source lookup -> permission-gated HTML fetch -> literal extraction -> Pydantic evidence -> deterministic eligibility and scoring -> six CrewAI tasks -> HTML report, Streamlit app, SQLite`
 
-Agents: product sourcing, supplier data collection, technical normalization, procurement analysis, evidence audit, executive reporting. CrewAI `Process.sequential` and `Task.context` link tasks. The LLM comments on validated inputs; it cannot change numeric assessments or insert data into the final report.
+The six roles cover sourcing, supplier collection, technical review, procurement analysis, evidence audit, and executive reporting. CrewAI uses sequential tasks with prior-task context. The local model cannot change final product records or arithmetic. Agent calls and orchestrator recovery calls have distinct trace stages.
 
-## Install and run
+## Run locally
 
-Python 3.12 and Ollama are required. This project was tested with `qwen2.5:1.5b-instruct`.
+Python 3.12 and a running Ollama server are required.
 
 ```sh
 uv venv --python 3.12 .venv
 uv pip install --python .venv/bin/python -e '.[test]'
 ollama pull qwen2.5:1.5b-instruct
 .venv/bin/python -m pytest -q
+.venv/bin/python -c 'from procurepilot.catalog_crew import run_catalog; print(run_catalog().report_path)'
 .venv/bin/streamlit run app.py --server.address 127.0.0.1
 ```
 
-For a CLI run: `.venv/bin/python scripts_run.py`. Set `TAVILY_API_KEY` in your shell to enable Tavily within a two-call budget. The application never subscribes or enables paid overage. To try reviewed pages, pass `--url https://... --approve-domain example.com`; review site terms, automated access guidance and robots instructions first. Only public HTTPS, allowlisted domains, no redirects, and small HTML responses are accepted. Search leads are never treated as verified products.
+In the app, open Request Builder and run the reviewed Egyptian catalog scenario. The general laptop request form remains available; it requires reviewed supplier URLs or a Tavily key. Set `TAVILY_API_KEY` to enable the capped Tavily adapter. No paid services or overage were used. The optional ScrapeGraphAI package was tested in an isolated environment with local HTML and Ollama; it did not produce validated records for the final run. See [integration results](docs/SCRAPEGRAPH_INTEGRATION.md).
 
-To opt into ScrapeGraphAI, install `.[scrapegraph]`. The adapter accepts local HTML and filters model claims against visible text. This optional dependency was not run in the verified local execution.
+## Decision rules
 
-## Requirements, price, and ranking
+Mandatory fields and complete landed cost gate eligibility. Unknown shipping, tax, warranty, direct supplier verification, or quantity availability leaves an offer needing verification. Only eligible offers get a weighted value score and recommendation rank. Catalog observations get a clearly labeled price-only order. No silent currency conversion is performed.
 
-The request covers company, category, delivery country, quantity, currency, budget, RAM, storage, warranty, required terms, excluded brands, and five weights totaling 100. Unverified mandatory fields mark an offer `needs_verification`; failed fields mark it `rejected`. Only fully eligible offers receive a score. Known cost is unit price times quantity, plus known shipping and tax when not already included. An unknown cost component prevents eligibility. Prices in other currencies are never converted silently. Numeric ranking is deterministic and does not use LLM arithmetic.
+## Source and security controls
 
-The Streamlit app includes a request builder, overview, execution timeline, product and supplier table, weight sensitivity controls, cost chart, evidence inspector, and HTML report preview/download. SQLite stores separate runs.
+Approved public HTTPS domains only; private addresses, redirects, oversized responses and long requests are blocked. This technical gate follows a manual terms and robots review. External page text is treated as data. Evidence stores source URL, retrieval time, literal excerpt and page hash. Raw third-party page captures, credentials, model weights and local database files are excluded from Git and submission packages.
 
-## Security and provenance
+## Status and limitations
 
-No API keys are embedded or logged. Remote URLs require public HTTPS and public DNS resolution. Fetches require an explicit approved domain, reject redirects, cap responses at 2 MB, and use a 15-second timeout. This does not substitute for a terms review. External content is untrusted. Source excerpts and hashes are stored in product evidence; missing claims remain missing. No source data or supplier prices are bundled.
-
-## Limitations
-
-Tavily live call, permitted supplier extraction, ScrapeGraphAI execution, live product ranking, and a source-backed recommendation have not been verified. The current report represents a completed agent workflow on empty source evidence, not a successful sourcing outcome. Local Ollama output quality is limited by the small model. Free cloud hosting is not deployed because a local Ollama server cannot be exposed safely or assumed available on a free host.
-
-## Licensing
-
-Project source is MIT licensed. CrewAI and ScrapeGraphAI license details should be checked against exact dependency versions before redistribution. No third-party product page captures are redistributed.
+Tavily live search is blocked by missing credentials. CrewAI agent-selected tool use is verified for sourcing only; extraction and scoring were completed by labeled orchestrator recovery. Direct supplier checks are incomplete. Local model summaries may be inaccurate; the HTML report is generated from validated Python records. Free cloud hosting is not verified. The project is MIT licensed; dependencies retain their own licenses.

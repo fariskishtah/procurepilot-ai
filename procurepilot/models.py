@@ -53,8 +53,11 @@ class Product(BaseModel):
     name: str
     supplier: str
     source_url: HttpUrl
+    supplier_url: HttpUrl | None = None
     captured_at: datetime
     capture_mode: str
+    verification_status: str = "direct_source"
+    source_checked_text: str | None = None
     brand: str | None = None
     model: str | None = None
     category: str | None = None
@@ -81,6 +84,7 @@ class Assessment(BaseModel):
     total_is_complete: bool = False
     score: Decimal | None = None
     rank: int | None = None
+    comparison_rank: int | None = None
 
 class RunResult(BaseModel):
     run_id: str

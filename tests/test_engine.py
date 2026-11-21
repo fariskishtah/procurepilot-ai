@@ -28,6 +28,13 @@ def test_ranking_is_deterministic():
     a,b=product(id="a"),product(id="b",price=Decimal("15000"))
     scores=rank([a,b],Request())
     assert scores[0].rank==1 and scores[1].rank==2
+def test_weight_sensitivity_changes_eligible_order():
+    cheap=product(id="cheap")
+    stronger=product(id="stronger",price=Decimal("15000"),ram_gb=32,storage_gb=1024,warranty_months=24)
+    price_first=Request(weights={"price":80,"specifications":15,"warranty":5,"availability":0,"evidence":0})
+    spec_first=Request(weights={"price":5,"specifications":70,"warranty":25,"availability":0,"evidence":0})
+    assert rank([cheap,stronger],price_first)[0].rank==1
+    assert rank([cheap,stronger],spec_first)[1].rank==1
 def test_url_blocks_private():
     with pytest.raises(SourceBlocked):validate_public_url("https://127.0.0.1/private")
     with pytest.raises(SourceBlocked):validate_public_url("http://example.com")
@@ -38,5 +45,5 @@ def test_jsonld_literal():
 def test_report_no_fabrication(tmp_path):
     result=RunResult(run_id="test",request=Request(),products=[],assessments=[],recommendation_status="no_verified_recommendation")
     html=generate(result,tmp_path/"report.html").read_text()
-    assert "No evidence-supported purchase recommendation" in html
+    assert "INSUFFICIENT VERIFIED EVIDENCE FOR RECOMMENDATION" in html
     assert "No verified offers were collected" in html

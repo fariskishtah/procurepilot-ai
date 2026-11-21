@@ -33,6 +33,7 @@ def assess(product: Product, request: Request) -> Assessment:
         if known_total > request.budget: rejected.append("Known cost exceeds budget")
         if not complete: unknown.append("Shipping or tax is unknown")
     if product.conflicts: unknown.append("Conflicting source claims")
+    if product.verification_status == "aggregator_observed": unknown.append("Supplier page was not independently verified")
     if product.availability != "in_stock": unknown.append("Availability not confirmed")
     if rejected: status = Status.REJECTED
     elif unknown: status = Status.NEEDS_VERIFICATION
@@ -41,14 +42,16 @@ def assess(product: Product, request: Request) -> Assessment:
 
 def rank(products: list[Product], request: Request) -> list[Assessment]:
     assessments = [assess(p, request) for p in products]
+    comparable = [(p, a) for p, a in zip(products, assessments) if p.price is not None and p.currency == request.currency and has_evidence(p, "price")]
+    for index, (_, a) in enumerate(sorted(comparable, key=lambda pair: (pair[0].price, pair[0].id)), 1): a.comparison_rank = index
     eligible = [(p, a) for p, a in zip(products, assessments) if a.status == Status.ELIGIBLE]
     if not eligible: return assessments
     prices = [p.price for p, _ in eligible]
     low, high = min(prices), max(prices)
     for p, a in eligible:
         price_score = Decimal(100) if high == low else (high - p.price) / (high - low) * 100
-        spec_score = min(Decimal(100), Decimal(p.ram_gb or 0) / Decimal(request.min_ram_gb or 16) * 50 + Decimal(p.storage_gb or 0) / Decimal(request.min_storage_gb or 512) * 50)
-        warranty_score = min(Decimal(100), Decimal(p.warranty_months or 0) / Decimal(max(request.min_warranty_months or 12, 1)) * 100)
+        spec_score = min(Decimal(100), Decimal(p.ram_gb or 0) / Decimal(request.min_ram_gb or 16) * 25 + Decimal(p.storage_gb or 0) / Decimal(request.min_storage_gb or 512) * 25)
+        warranty_score = min(Decimal(100), Decimal(p.warranty_months or 0) / Decimal(max(request.min_warranty_months or 12, 1)) * 50)
         availability_score = Decimal(100) if p.availability == "in_stock" else Decimal(0)
         evidence_score = Decimal(min(100, len({e.field for e in p.evidence}) * 20))
         values = {"price": price_score, "specifications": spec_score, "warranty": warranty_score, "availability": availability_score, "evidence": evidence_score}

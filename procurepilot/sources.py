@@ -102,8 +102,20 @@ class ScrapeGraphExtractor:
 
     def extract(self, html: str) -> dict:
         from scrapegraphai.graphs import SmartScraperGraph
-        graph = SmartScraperGraph(prompt="Extract product title, brand, model, price, currency, specifications, warranty, availability and seller. Return only fields literally present in the HTML.", source=html, config={"llm": {"model": self.model, "base_url": "http://localhost:11434", "temperature": 0}, "verbose": False, "headless": True})
+        soup=BeautifulSoup(html,"html.parser")
+        catalog_section=soup.select_one('section[aria-labelledby="offers-heading"]')
+        source=f"<html><body>{catalog_section}</body></html>" if catalog_section else html
+        prompt=("Extract name, supplier, price and currency from current offers in the first visible offer list only. Exclude stale offers in details. Return JSON." if catalog_section else "Extract product title, brand, model, price, currency, specifications, warranty, availability and seller. Return only fields literally present in the HTML.")
+        graph = SmartScraperGraph(prompt=prompt, source=source, config={"llm": {"model": self.model, "base_url": "http://localhost:11434", "model_tokens": 8192, "format": "json", "temperature": 0}, "verbose": False, "headless": True})
         result = graph.run()
         if not isinstance(result, dict): raise ValueError("ScrapeGraph returned no structured object")
-        visible = BeautifulSoup(html, "html.parser").get_text(" ", strip=True).lower()
+        if catalog_section:
+            from .catalog import CATALOG_URL, extract_catalog_offers
+            expected=extract_catalog_offers(html,CATALOG_URL,datetime.now(timezone.utc))
+            allowed={(p.name,p.supplier,f"EGP {p.price}",p.currency) for p in expected}
+            candidates=result.get("content",[])
+            if not isinstance(candidates,list): candidates=[]
+            accepted=[x for x in candidates if isinstance(x,dict) and (x.get("name"),x.get("supplier"),x.get("price"),x.get("currency")) in allowed]
+            return {"content":accepted,"rejected_count":len(candidates)-len(accepted),"reference_offer_count":len(expected)}
+        visible = soup.get_text(" ", strip=True).lower()
         return {k: v for k, v in result.items() if isinstance(v, (str, int, float)) and str(v).lower() in visible}

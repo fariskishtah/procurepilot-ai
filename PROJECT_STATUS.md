@@ -2,15 +2,15 @@
 
 | Area | Status | Evidence |
 |---|---|---|
-| CrewAI 1.15.44 sequential execution | Verified | Six completed task outputs in authentic 8.14-second trace |
-| Agent tool invocation | Not verified | 0 CrewAI tool calls; small local model did not invoke offered evidence tool |
-| Ollama local model | Verified | qwen2.5:1.5b-instruct |
-| Tavily adapter | Implemented, live blocked | TAVILY_API_KEY absent |
-| ScrapeGraphAI adapter | Mock tested, live blocked | Optional dependency not installed in verified run |
-| Permitted source collection | Blocked | No reviewed supplier sources or search credentials |
-| Product ranking | Unit tested, no live offers | No product evidence collected |
-| HTML report | Generated and browser verified | Honest no-recommendation report |
-| Streamlit app | Browser verified | Overview, form, report view; 0 browser console errors |
-| Automated tests | 15 passed, 0 failed, 0 skipped | pytest |
-| Academic assignment | Partial | Core agent execution verified; sourcing, agent tool use and live offers missing |
-| Public release | Source published, project partial | https://github.com/fariskishtah/procurepilot-ai |
+| Six-agent CrewAI workflow | Verified | Run `ba0e0163e5f8`: 6/6 tasks, 53.92 seconds, local Ollama 1.5B |
+| Agent-selected tool calls | Partially verified | 1 genuine `catalog_source_lookup` call; extraction and assessment agents omitted their tools |
+| Orchestrator recovery | Verified, labeled | 2 guardrail calls: catalog extraction and deterministic assessment |
+| Reviewed source collection | Verified for secondary scenario | Five current HC-05 offers from one Makhzan catalog page; stale offers excluded |
+| Direct supplier verification | Partial | Makers price and stock checked manually; other shops and bulk terms unverified |
+| Procurement recommendation | Insufficient evidence | All five offers need verification; only price-only order shown |
+| Original laptop scenario | Blocked | No complete permitted supplier evidence |
+| Tavily | Implemented, live blocked | `TAVILY_API_KEY` absent |
+| ScrapeGraphAI | Real local compatibility test; rejected output | Isolated package 2.3.1 with local Ollama and HTML; outputs failed deterministic validation |
+| Automated tests | 22 passed | 0 failed, 0 skipped |
+| Academic assignment | PARTIAL | Multi-agent and sourcing demo work, but original scenario and full agent tool selection are incomplete |
+| Public repository | Published | https://github.com/fariskishtah/procurepilot-ai |

@@ -1,7 +1,7 @@
 # Tools and source policy
 
-Tavily Search uses the official HTTPS `/search` endpoint, bearer token from environment, basic depth, up to five results, and two calls per run. Missing credentials fail closed. Docs: https://docs.tavily.com/documentation/api-reference/endpoint/search.
+The reviewed Makhzan `/products/` page is fetched with an exact public HTTPS allowlist, redirect rejection, timeout and size cap. Its terms allow work-related search/comparison within robots guidance. Its `/search` and `/api` paths are not fetched. The current-offer DOM list is parsed literally, with stale offers excluded. Source: https://makhzan.merope.dev/terms and https://makhzan.merope.dev/robots.txt.
 
-The permitted HTML fetch requires a domain manually added after terms review. It blocks private addresses and redirects. JSON-LD Product extraction takes literal fields only. ScrapeGraphAI `SmartScraperGraph` is an optional local HTML adapter; it was not installed or executed in the verified run. Repo: https://github.com/ScrapeGraphAI/Scrapegraph-ai.
+Tavily uses the official HTTPS `/search` endpoint, bearer token from environment, basic depth and a two-call budget. Missing credentials fail closed. No Tavily live call occurred. Docs: https://docs.tavily.com/documentation/api-reference/endpoint/search.
 
-No supplier domains were approved for the included run. No source captures are redistributed.
+ScrapeGraphAI `SmartScraperGraph` was run locally on reviewed HTML with Ollama. Its unverified rows were not accepted as procurement evidence. No third-party page captures or secrets are redistributed.

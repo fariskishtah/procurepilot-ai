@@ -6,6 +6,7 @@ import plotly.express as px
 import streamlit as st
 from procurepilot.models import Request, RunResult
 from procurepilot.crew import run
+from procurepilot.catalog_crew import run_catalog
 from procurepilot.storage import save, list_runs, load
 from procurepilot.engine import rank
 
@@ -23,6 +24,13 @@ with st.sidebar:
 result: RunResult | None = st.session_state.get("result")
 if page == "Request Builder":
     st.header("Procurement request")
+    st.info("Permitted live catalog demonstration: 10 HC-05 wireless serial modules for NileTech R&D. Catalog prices are observations; direct supplier confirmation and purchase recommendation remain pending.")
+    if st.button("Run reviewed Egyptian catalog scenario"):
+        with st.spinner("Running live catalog lookup and six sequential CrewAI tasks..."):
+            result=run_catalog()
+            save(result)
+            st.session_state.result=result
+        st.success(f"Run {result.run_id} saved. Agent-selected tool calls: {sum(x.get('stage')=='agent_tool' for x in result.task_trace)}.")
     with st.form("request"):
         a,b,c = st.columns(3)
         with a:
@@ -73,7 +81,7 @@ else:
         st.header("Product intelligence")
         if not result.products: st.warning("No source-backed products were collected in this run.")
         else:
-            rows=[{"Product":p.name,"Supplier":p.supplier,"Price":float(p.price) if p.price is not None else None,"Currency":p.currency,"RAM GB":p.ram_gb,"Storage GB":p.storage_gb,"Warranty months":p.warranty_months,"Availability":p.availability,"Source":str(p.source_url)} for p in result.products]
+            rows=[{"Product":p.name,"Supplier":p.supplier,"Observed price":float(p.price) if p.price is not None else None,"Currency":p.currency,"Model":p.model,"RAM GB":p.ram_gb,"Storage GB":p.storage_gb,"Warranty months":p.warranty_months,"Availability":p.availability,"Verification":p.verification_status,"Catalog source":str(p.source_url),"Supplier page":str(p.supplier_url or '')} for p in result.products]
             st.dataframe(pd.DataFrame(rows),use_container_width=True)
     elif page == "Scoring & Costs":
         st.header("Eligibility, scoring, and cost")
@@ -87,7 +95,7 @@ else:
         else:
             st.error("Weights must total 100%")
             assessment=result.assessments
-        rows=[{"Product":next((p.name for p in result.products if p.id==a.product_id),a.product_id),"Status":a.status.value,"Known total":float(a.known_total) if a.known_total is not None else None,"Complete total":a.total_is_complete,"Score":float(a.score) if a.score is not None else None,"Rank":a.rank,"Reasons":"; ".join(a.reasons)} for a in assessment]
+        rows=[{"Product":next((p.name for p in result.products if p.id==a.product_id),a.product_id),"Status":a.status.value,"Known total":float(a.known_total) if a.known_total is not None else None,"Complete total":a.total_is_complete,"Value score":float(a.score) if a.score is not None else None,"Eligible rank":a.rank,"Price-only order":a.comparison_rank,"Reasons":"; ".join(a.reasons)} for a in assessment]
         if rows:
             df=pd.DataFrame(rows);st.dataframe(df,use_container_width=True)
             costs=df.dropna(subset=["Known total"])

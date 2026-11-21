@@ -18,12 +18,14 @@ ROLES = [
  ("Executive Procurement Report Specialist", "Summarize verified findings and limitations without inventing facts"),
 ]
 
-def build_crew(request: Request, products: list[Product], assessments: list, model: str | None = None):
+def build_crew(request: Request, products: list[Product], assessments: list, model: str | None = None, tool_events: list[dict] | None = None):
     llm = LLM(model="ollama/" + (model or os.getenv("OLLAMA_MODEL", "qwen2.5:1.5b-instruct")), base_url="http://localhost:11434", temperature=0, timeout=90)
     data = json.dumps({"request": request.model_dump(mode="json"), "products": [p.model_dump(mode="json") for p in products], "assessments": [a.model_dump(mode="json") for a in assessments]}, ensure_ascii=False)[:16000]
     @tool("Read validated procurement evidence")
     def read_validated_evidence() -> str:
         """Return validated procurement inputs and deterministic assessments; do not alter facts."""
+        if tool_events is not None:
+            tool_events.append({"stage":"agent_tool","tool":"Read validated procurement evidence","status":"ok","at":datetime.now(timezone.utc).isoformat(),"executor":"agent_selected"})
         return data
     agents = []
     tasks = []
@@ -72,15 +74,18 @@ def run(request: Request, *, mode: str = "live", approved_domains: set[str] | No
     eligible = sorted((a for a in assessments if a.status == Status.ELIGIBLE), key=lambda a: a.rank or 999)
     result = RunResult(run_id=run_id, request=request, products=products, assessments=assessments, recommendation_id=eligible[0].product_id if eligible else None, recommendation_status="eligible_offer" if eligible else "no_verified_recommendation", task_trace=events)
     if run_crew:
-        crew, tasks = build_crew(request, products, assessments)
+        tool_events: list[dict] = []
+        crew, tasks = build_crew(request, products, assessments, tool_events=tool_events)
         t0 = time.monotonic()
         try:
             output = crew.kickoff()
             result.crew_completed = True
+            result.task_trace.extend(tool_events)
             for i, task in enumerate(tasks):
-                result.task_trace.append({"stage": "crewai", "agent": ROLES[i][0], "task": i+1, "status": "completed" if task.output else "missing_output", "tool_calls": task.used_tools, "tool_errors": task.tools_errors, "output": str(task.output)[:2000] if task.output else "", "at": datetime.now(timezone.utc).isoformat()})
+                result.task_trace.append({"stage": "crewai", "agent": ROLES[i][0], "task": i+1, "status": "completed" if task.output else "missing_output", "output": str(task.output)[:2000] if task.output else "", "at": datetime.now(timezone.utc).isoformat()})
             result.task_trace.append({"stage": "crewai", "status": "completed", "duration_seconds": round(time.monotonic()-t0, 2), "output": str(output)[:2000]})
         except Exception as exc:
+            result.task_trace.extend(tool_events)
             result.task_trace.append({"stage": "crewai", "status": "failed", "duration_seconds": round(time.monotonic()-t0, 2), "error": f"{type(exc).__name__}: {str(exc)[:500]}"})
     output_dir = Path(output_dir)
     report_path = generate(result, output_dir / "reports" / f"{run_id}.html")

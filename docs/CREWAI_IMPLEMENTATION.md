@@ -1,5 +1,7 @@
 # CrewAI implementation
 
-`procurepilot/crew.py` creates six distinct `Agent` objects, six `Task` objects, and one `Crew(process=Process.sequential)`. Each task after the first has `context=[previous_task]`. Agents have bounded iterations and execution time. The verified 1.5B model run trace records six completed outputs in 8.14 seconds. Four agents are offered a read-only evidence tool, but the small local model made **zero tool calls** despite task instructions. This is a known limitation. Sourcing was blocked before Crew kickoff; completion establishes orchestration, not product discovery.
+`procurepilot/catalog_crew.py` builds six distinct agents and six sequential tasks. Each task after the first receives the previous task as context. The live run `ba0e0163e5f8` completed all six tasks in 53.92 seconds on local Ollama. The sourcing agent invoked its registered tool once. The collection and procurement agents omitted their tools, so guardrails retried and then invoked deterministic recovery. The trace marks one `agent_tool` and two `orchestrator_tool` events. Those are not interchangeable.
 
-Docs checked: https://docs.crewai.com/en/concepts/crews, https://docs.crewai.com/en/concepts/tasks, https://docs.crewai.com/en/learn/llm-connections.
+A separate minimal CrewAI tool probe showed that `Task.used_tools` can remain zero even when the tool body executes, so instrumentation now lives inside each tool function. The general workflow in `procurepilot/crew.py` has the same direct-call logging. See `TOOL_CALLING_ROOT_CAUSE.md` and `FINAL_PROCUREMENT_RUN.md`.
+
+Documentation: https://docs.crewai.com/en/concepts/crews and https://docs.crewai.com/en/concepts/tasks.
