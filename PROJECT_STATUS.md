@@ -13,4 +13,4 @@
 | Streamlit app | Browser verified | Overview, form, report view; 0 browser console errors |
 | Automated tests | 15 passed, 0 failed, 0 skipped | pytest |
 | Academic assignment | Partial | Core agent execution verified; sourcing, agent tool use and live offers missing |
-| Public release | Pending | Repository not yet created/published |
+| Public release | Source published, project partial | https://github.com/fariskishtah/procurepilot-ai |

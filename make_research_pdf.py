@@ -45,7 +45,7 @@ header('REPRODUCIBILITY AND REFERENCES','Source documents and release notes')
 y=718
 y=block(y,'Reproduce locally','Install Python 3.12 dependencies from pyproject.toml, start Ollama and pull qwen2.5:1.5b-instruct. Run .venv/bin/python scripts_run.py and .venv/bin/python -m pytest -q. Start .venv/bin/streamlit run app.py. No key is needed to reproduce the empty-evidence agent workflow. The model wording and runtime may vary.')
 y=block(y,'Source references','CrewAI: https://docs.crewai.com/en/concepts/crews and /tasks. Tavily API: https://docs.tavily.com/documentation/api-reference/endpoint/search. ScrapeGraphAI open source: https://github.com/ScrapeGraphAI/Scrapegraph-ai. The included run trace and source code are the primary evidence for this implementation.')
-y=block(y,'Release status','The GitHub repository and free hosting were not verified at the time this research report was drafted. No supplier data, private credentials, model weights or third-party captures are included. Original project source is MIT licensed; dependency and model licenses remain separate.')
+y=block(y,'Release status','The source repository is public at https://github.com/fariskishtah/procurepilot-ai. Free hosting is not verified. No supplier data, private credentials, model weights or third-party captures are included. Original project source is MIT licensed; dependency and model licenses remain separate.')
 y=block(y,'Conclusion','ProcurePilot AI demonstrates an actual six-agent sequential CrewAI workflow and evidence-first decision logic. It does not yet meet the assignment requirement for source-backed multi-supplier comparison. Its honest no-recommendation output is the correct result for the verified run.')
 c.save()
 print(out.resolve())
