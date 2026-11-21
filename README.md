@@ -21,7 +21,7 @@ uv venv --python 3.12 .venv
 uv pip install --python .venv/bin/python -e '.[test]'
 ollama pull qwen2.5:1.5b-instruct
 .venv/bin/python -m pytest -q
-.venv/bin/streamlit run app.py
+.venv/bin/streamlit run app.py --server.address 127.0.0.1
 ```
 
 For a CLI run: `.venv/bin/python scripts_run.py`. Set `TAVILY_API_KEY` in your shell to enable Tavily within a two-call budget. The application never subscribes or enables paid overage. To try reviewed pages, pass `--url https://... --approve-domain example.com`; review site terms, automated access guidance and robots instructions first. Only public HTTPS, allowlisted domains, no redirects, and small HTML responses are accepted. Search leads are never treated as verified products.

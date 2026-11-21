@@ -105,5 +105,5 @@ else:
         if result.report_path and Path(result.report_path).exists():
             html=Path(result.report_path).read_text()
             st.download_button("Download HTML report",html,file_name="ProcurePilot_Procurement_Report.html",mime="text/html")
-            st.components.v1.html(html,height=800,scrolling=True)
+            st.iframe(Path(result.report_path), height=800, alt="Procurement HTML report preview")
         else:st.warning("Report file missing")
