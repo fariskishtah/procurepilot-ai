@@ -1,0 +1,3 @@
+# Procurement scoring
+
+A failed mandatory criterion rejects the offer. Missing source evidence creates `needs_verification`. Incomplete tax/shipping and unconfirmed availability also prevent eligible recommendation. Eligible offers get a weighted 0–100 score across relative unit price, specification match, warranty, availability, and evidence coverage. Weights must sum to 100. Tie order is score descending, price ascending, then stable ID. This is a decision aid, not supplier reliability certification. The price score is relative to eligible offers in the same currency; the app never invents exchange rates.

@@ -1,0 +1,3 @@
+# Evaluation
+
+The verified local run on 21 November 2026 produced 0 candidates, 0 collected products, 0 eligible offers, 6/6 completed CrewAI task outputs, and an honest HTML report. CrewAI duration was 8.14 seconds; offered CrewAI evidence tools were invoked 0 times. A separate local Qwen2.5 3B run completed six tasks in 30.06 seconds but likewise had zero agent tool calls. No extraction accuracy percentage is reported because no labeled real product pages were collected. The automated unit suite had 15/15 passes. Playwright confirmed the overview, request form, report iframe and downloadable HTML on desktop, plus a mobile form view; the checked page had 0 browser console errors and 9 warnings. No multi-agent superiority claim is made.

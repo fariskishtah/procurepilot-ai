@@ -1,0 +1,3 @@
+# Security
+
+Secrets only enter through environment variables. Tavily calls are bounded. Public URL checks reject local/private IPs and require HTTPS. Redirects are rejected; request timeout is 15 seconds; body cap is 2 MB. Source domains require manual approval after terms and robots review. No CAPTCHA bypass or private access is implemented. An LLM sees untrusted excerpts only as data, and final costs, eligibility, ranking and HTML are generated from validated models. Residual risk: DNS rebinding between validation and connection is possible with the current HTTP client; use a hardened resolver/egress proxy before deployment in a hostile network.

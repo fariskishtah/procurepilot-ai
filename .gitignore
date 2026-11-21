@@ -1,0 +1,11 @@
+.venv/
+.env
+__pycache__/
+.pytest_cache/
+*.pyc
+*.db
+artifacts/reports/*
+artifacts/traces/*
+.playwright-cli/
+.DS_Store
+.pytest_cache/
