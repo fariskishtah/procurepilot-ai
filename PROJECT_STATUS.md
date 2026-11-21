@@ -1,16 +1,19 @@
 # Project status — 21 November 2026
 
-| Area | Status | Evidence |
+| Requirement | Status | Evidence |
 |---|---|---|
-| Six-agent CrewAI workflow | Verified | Run `ba0e0163e5f8`: 6/6 tasks, 53.92 seconds, local Ollama 1.5B |
-| Agent-selected tool calls | Partially verified | 1 genuine `catalog_source_lookup` call; extraction and assessment agents omitted their tools |
-| Orchestrator recovery | Verified, labeled | 2 guardrail calls: catalog extraction and deterministic assessment |
-| Reviewed source collection | Verified for secondary scenario | Five current HC-05 offers from one Makhzan catalog page; stale offers excluded |
-| Direct supplier verification | Partial | Makers price and stock checked manually; other shops and bulk terms unverified |
-| Procurement recommendation | Insufficient evidence | All five offers need verification; only price-only order shown |
-| Original laptop scenario | Blocked | No complete permitted supplier evidence |
-| Tavily | Implemented, live blocked | `TAVILY_API_KEY` absent |
-| ScrapeGraphAI | Real local compatibility test; rejected output | Isolated package 2.3.1 with local Ollama and HTML; outputs failed deterministic validation |
-| Automated tests | 22 passed | 0 failed, 0 skipped |
-| Academic assignment | PARTIAL | Multi-agent and sourcing demo work, but original scenario and full agent tool selection are incomplete |
-| Public repository | Published | https://github.com/fariskishtah/procurepilot-ai |
+| Six-agent CrewAI sequential process | VERIFIED | Run `49bba9141fdb`: 6/6 tasks, `43.51` seconds, local Ollama |
+| Agent-selected sourcing tool | VERIFIED | `reviewed_supplier_lookup` executed and fetched three direct pages |
+| Agent-selected data collection tool | VERIFIED | `literal_supplier_extraction` executed and parsed three pages |
+| Agent-selected assessment tool | PARTIALLY VERIFIED | Model omitted it; guardrail executed deterministic assessment, labeled `orchestrator_tool` |
+| Independent multi-supplier sourcing | VERIFIED | Three supplier domains and direct product pages; source URLs in final run document |
+| Exact model, configuration, price and currency | VERIFIED for observed pages | Visible fields and JSON-LD cross-check where available |
+| Stock and warranty | PARTIALLY VERIFIED | Makers and Ampere stock labels visible; RAM stock and all warranties missing |
+| Complete landed cost and purchase recommendation | BLOCKED | Shipping, tax and ten-unit stock unconfirmed; all offers need verification |
+| Original 10-laptop scenario | BLOCKED | No complete permitted supplier evidence |
+| Tavily live call | BLOCKED | `TAVILY_API_KEY` absent |
+| ScrapeGraphAI reliability | PARTIALLY VERIFIED | Package ran locally; outputs varied; strict validation retained |
+| Automated tests | VERIFIED | `26` passed, 0 failed, 0 skipped |
+| Browser and HTML report | VERIFIED | Direct HTML and Streamlit pages checked; see evaluation |
+| Free cloud hosting | NOT IMPLEMENTED | Local Ollama requirement |
+| Academic assignment | PARTIAL | Multi-source comparison works; full costs, recommendation and original laptop request remain open |

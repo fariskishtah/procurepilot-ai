@@ -5,8 +5,6 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parent
 DEST=Path('/Users/fariskishtah/INSTANT_AI_Training_Submissions/SPRINT_4_GAN_AND_AGENTS/05_ProcurePilot_AI')
-STAGE=DEST/'ProcurePilot_AI_Final_Release'
-ZIP=DEST/'ProcurePilot_AI_Final_Submission.zip'
 
 def digest(path: Path) -> str:
     h=hashlib.sha256()
@@ -21,13 +19,17 @@ def copy(source: Path, target: Path):
 def main():
     p=argparse.ArgumentParser()
     p.add_argument('--run-id',required=True)
+    p.add_argument('--release-name',default='ProcurePilot_AI_Final_Submission')
     args=p.parse_args()
+    if not args.release_name.replace('_','').isalnum(): raise SystemExit('Invalid release name')
+    STAGE=DEST/(args.release_name+'_files')
+    ZIP=DEST/(args.release_name+'.zip')
     if ZIP.exists() or STAGE.exists(): raise SystemExit('Final package already exists; preserving it. Remove it explicitly to rebuild.')
     trace=ROOT/'artifacts'/'traces'/f'{args.run_id}.json'
     report=ROOT/'artifacts'/'reports'/f'{args.run_id}.html'
     if not trace.is_file() or not report.is_file(): raise SystemExit('Final run artifacts missing')
     result=json.loads(trace.read_text())
-    if not result.get('crew_completed') or len(result.get('products',[]))!=5: raise SystemExit('Unexpected final run result')
+    if not result.get('crew_completed') or len(result.get('products',[]))<2 or len({p['source_url'].split('/')[2] for p in result['products']})<2: raise SystemExit('Expected a completed, independent multi-source run')
     commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     if subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True).strip(): raise SystemExit('Commit all project changes before packaging')
     tracked=subprocess.check_output(['git','ls-files'],cwd=ROOT,text=True).splitlines()
@@ -38,11 +40,13 @@ def main():
     copy(trace,STAGE/'05_RESULTS'/'Final_CrewAI_Execution_Trace.json')
     copy(report,STAGE/'06_PROCUREMENT_REPORTS'/'ProcurePilot_Final_Procurement_Report.html')
     copy(ROOT/'ProcurePilot_AI_Research_Report.pdf',STAGE/'07_RESEARCH_REPORT'/'ProcurePilot_AI_Research_Report.pdf')
-    for shot in (ROOT/'artifacts'/'screenshots'/'final').glob('*.png'):
+    screenshot_dir=ROOT/'artifacts'/'screenshots'/'academic_completion'
+    if not screenshot_dir.exists(): screenshot_dir=ROOT/'artifacts'/'screenshots'/'final'
+    for shot in screenshot_dir.glob('*.png'):
         copy(shot,STAGE/'04_SCREENSHOTS'/shot.name)
-    (STAGE/'README_FIRST.md').write_text(f'# ProcurePilot AI final release\n\nAcademic status: PARTIAL. Run `{args.run_id}` completed six CrewAI tasks, sourced five current catalog offers, and made no purchase recommendation. One agent-selected source tool call and two labeled orchestrator recovery calls are in the trace. Original laptop scenario and direct supplier validation remain incomplete. Start with `02_PROJECT_FILES/docs/FINAL_PROCUREMENT_RUN.md`.\n',encoding='utf-8')
+    (STAGE/'README_FIRST.md').write_text(f'# ProcurePilot AI academic completion release\n\nAcademic status: PARTIAL. Run `{args.run_id}` completed six CrewAI tasks and observed {len(result["products"])} direct supplier offers from independent websites. See the trace for agent-selected calls and labeled orchestrator recovery. No purchase recommendation is made because landed cost and ten-unit stock remain unconfirmed. The original laptop scenario remains unverified. Start with `02_PROJECT_FILES/docs/ACADEMIC_COMPLETION_RUN.md`.\n',encoding='utf-8')
     (STAGE/'01_GITHUB_PROJECT.md').write_text(f'# GitHub project\n\nhttps://github.com/fariskishtah/procurepilot-ai\n\nBranch: main\n\nCommit: `{commit}`\n',encoding='utf-8')
-    (STAGE/'SUBMISSION_CHECKLIST.md').write_text('# Checklist\n\n- [x] Source, docs, tests and license\n- [x] Genuine six-task CrewAI trace\n- [x] Five source-backed catalog observations\n- [x] Browser screenshots, HTML report and research PDF\n- [x] Agent tool call and orchestrator recovery distinguished\n- [ ] Original laptop sourcing\n- [ ] Direct confirmation of all five supplier offers and landed cost\n- [ ] Full agent-selected extraction and assessment\n- [ ] Tavily live call and free cloud hosting\n',encoding='utf-8')
+    (STAGE/'SUBMISSION_CHECKLIST.md').write_text('# Checklist\n\n- [x] Source, docs, tests and license\n- [x] Genuine six-task CrewAI trace\n- [x] Independent direct supplier price observations\n- [x] Browser screenshots, HTML report and research PDF\n- [x] Agent tool calls and orchestrator recovery distinguished\n- [ ] Original laptop sourcing\n- [ ] Confirmed ten-unit stock, shipping, tax and warranty\n- [ ] Full agent-selected assessment\n- [ ] Tavily live call and free cloud hosting\n',encoding='utf-8')
     paths=[p for p in sorted(STAGE.rglob('*')) if p.is_file()]
     manifest={'commit':commit,'run_id':args.run_id,'files':{str(p.relative_to(STAGE)):{'size':p.stat().st_size,'sha256':digest(p)} for p in paths}}
     (STAGE/'ARTIFACT_MANIFEST.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
@@ -60,7 +64,7 @@ def main():
                 staged=STAGE/name
                 if digest(extracted)!=digest(staged): raise RuntimeError(f'Extraction mismatch: {name}')
     checksum=digest(ZIP)
-    (DEST/'ProcurePilot_AI_Final_Submission.zip.sha256').write_text(f'{checksum}  {ZIP.name}\n',encoding='utf-8')
+    (DEST/(ZIP.name+'.sha256')).write_text(f'{checksum}  {ZIP.name}\n',encoding='utf-8')
     print(json.dumps({'zip':str(ZIP),'size':ZIP.stat().st_size,'sha256':checksum,'files':len(names),'screenshots':len(list((STAGE/'04_SCREENSHOTS').glob('*.png'))),'commit':commit,'run_id':args.run_id},indent=2))
 
 if __name__=='__main__': main()

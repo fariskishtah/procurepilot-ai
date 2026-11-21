@@ -1,5 +1,7 @@
 # Final live procurement run
 
+Historical catalog-only run. The current academic demonstration is the independent direct-supplier run in `ACADEMIC_COMPLETION_RUN.md`.
+
 Run ID: `ba0e0163e5f8`. Local date: 21 November 2026. Scenario: fictional NileTech R&D request for 10 HC-05 wireless serial modules, 3,000 EGP ceiling. Source: https://makhzan.merope.dev/products/b8c70b58-ff9c-406e-8d22-e256089ce7ca-hc-05-bluetooth-module-serial-ttl.
 
 Six CrewAI tasks completed in 53.92 seconds with `qwen2.5:1.5b-instruct`. The agent itself invoked `catalog_source_lookup` once. The model did not invoke `catalog_evidence_retrieval` or `deterministic_procurement_assessment`; after retries, task guardrails ran those deterministic functions. The trace calls these `orchestrator_tool`, never `agent_tool`. A completed task is not evidence that its assigned LLM invoked a tool.

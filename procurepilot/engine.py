@@ -1,11 +1,20 @@
 from __future__ import annotations
 from decimal import Decimal
+import re
 from .models import Request, Product, Assessment, Status
 
 REQUIRED_EVIDENCE = {"price": "price", "ram_gb": "ram_gb", "storage_gb": "storage_gb", "warranty_months": "warranty_months"}
 
 def has_evidence(product: Product, field: str) -> bool:
-    return any(e.field == field and e.value and e.excerpt and e.value.lower() in e.excerpt.lower() for e in product.evidence)
+    for e in product.evidence:
+        if e.field != field or not e.value or not e.excerpt: continue
+        if e.value.lower() in e.excerpt.lower(): return True
+        if field == "price" and e.method == "direct_visible_html":
+            for match in re.finditer(r"\b([\d.]+,\d{2})\s*EGP\b", e.excerpt):
+                try:
+                    if Decimal(match.group(1).replace(".", "").replace(",", ".")) == product.price: return True
+                except (ValueError, ArithmeticError): pass
+    return False
 
 def assess(product: Product, request: Request) -> Assessment:
     rejected, unknown = [], []

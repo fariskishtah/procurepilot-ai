@@ -1,4 +1,4 @@
-"""Generate the source-backed, bounded Sprint 4 research report."""
+"""Generate the source-backed Sprint 4 academic completion research report."""
 from pathlib import Path
 from reportlab.pdfgen import canvas
 from reportlab.lib.colors import HexColor
@@ -12,40 +12,40 @@ page=0
 def header(title, subtitle):
     global page
     page+=1
-    c.setFillColor(NAVY); c.rect(0,765,595,77,fill=1,stroke=0)
-    c.setFont('Helvetica-Bold',17); c.setFillColor(HexColor('#ffffff')); c.drawString(44,803,title)
-    c.setFont('Helvetica',9); c.setFillColor(HexColor('#d5dfec')); c.drawString(44,785,subtitle)
-    c.setStrokeColor(GOLD); c.setLineWidth(2); c.line(44,752,551,752)
-    c.setFont('Helvetica',8); c.setFillColor(MUTED); c.drawString(44,28,'ProcurePilot AI | Faris Mohamed Kishtah | 21 November 2026')
+    c.setFillColor(NAVY);c.rect(0,765,595,77,fill=1,stroke=0)
+    c.setFont('Helvetica-Bold',17);c.setFillColor(HexColor('#ffffff'));c.drawString(44,803,title)
+    c.setFont('Helvetica',9);c.setFillColor(HexColor('#d5dfec'));c.drawString(44,785,subtitle)
+    c.setStrokeColor(GOLD);c.setLineWidth(2);c.line(44,752,551,752)
+    c.setFont('Helvetica',8);c.setFillColor(MUTED);c.drawString(44,28,'ProcurePilot AI | Faris Mohamed Kishtah | 21 November 2026')
     c.drawRightString(551,28,str(page))
 
 def block(y,title,body):
-    c.setFillColor(NAVY); c.setFont('Helvetica-Bold',12); c.drawString(44,y,title); y-=18
-    c.setFillColor(INK); c.setFont('Helvetica',9.5)
+    c.setFillColor(NAVY);c.setFont('Helvetica-Bold',12);c.drawString(44,y,title);y-=18
+    c.setFillColor(INK);c.setFont('Helvetica',9.5)
     for line in simpleSplit(body,'Helvetica',9.5,507):
-        c.drawString(44,y,line); y-=14
+        c.drawString(44,y,line);y-=14
     return y-18
 
-header('PROCUREPILOT AI','Technical research report | Sprint 4 - Project 5 | Evidence-first procurement')
+header('PROCUREPILOT AI','Technical research report | Sprint 4 - Project 5 | Academic completion sprint')
 y=718
-y=block(y,'Executive summary','A real six-task CrewAI run completed locally on Ollama. A reviewed Egyptian catalog product page supplied five current HC-05 module offers. One agent-selected source lookup executed. The model skipped extraction and assessment tools, so guardrails ran those deterministic functions and labeled them as orchestrator calls. All five offers require verification. No purchase recommendation is supported. Academic status: PARTIAL.')
-y=block(y,'Two procurement scenarios','The original NileTech Operations request is 10 business laptops within 300,000 EGP, with RAM, storage, warranty and SSD requirements. It remains unverified. A separate fictional NileTech R&D scenario requests 10 HC-05 wireless serial modules within 3,000 EGP and is used for real catalog sourcing. Neither scenario represents a real buyer.')
-y=block(y,'Architecture and trust boundary','Request validation -> reviewed public HTTPS source -> literal current-offer extraction -> Pydantic evidence -> deterministic cost and eligibility -> sequential CrewAI analysis -> HTML report, Streamlit app and SQLite. External page text is data, not instructions. Tool bodies record actual invocation events; the language model cannot alter accepted product records or numeric calculations.')
-y=block(y,'Six-agent workflow','Sourcing, supplier collection, technical review, procurement analysis, evidence audit and executive reporting each have a distinct CrewAI Agent and Task. Each task receives the previous task as context. Source lookup is agent-selected; extraction and assessment fell back to explicit guardrail execution after retries.')
+y=block(y,'Executive summary','Three independent Egyptian supplier product pages were fetched directly for a coherent fictional NileTech R&D request: ten HC-05 wireless serial modules within 3,000 EGP. A real six-agent CrewAI run completed. The sourcing and data collection agents each selected a tool; deterministic assessment was run by a labeled orchestrator guardrail. Shipping, tax, warranty and confirmed ten-unit stock remain incomplete. No purchase recommendation is supported. Academic status: PARTIAL.')
+y=block(y,'Scenario and requirements','The final demonstration uses HC-05 modules, not business laptops. Exact model HC-05, quantity ten, delivery in Egypt, EGP currency and a 3,000 EGP ceiling are the stated requirements. The original ten-laptop, 300,000 EGP request remains unverified and is not evaluated using module offers. NileTech Operations is fictional.')
+y=block(y,'Architecture','Request -> three permission-reviewed direct supplier URLs -> public HTTPS fetch -> visible HTML and JSON-LD cross-check -> Pydantic evidence -> deterministic eligibility and price comparison -> sequential CrewAI tasks -> HTML report, Streamlit app and SQLite. The LLM cannot change accepted product records or final arithmetic.')
+y=block(y,'Trust and access','The project fetches exact reviewed product URLs only, with public-host checks, redirect rejection, timeout and size limits. Makers, Ampere and RAM robots/terms were reviewed. No raw third-party page capture is redistributed. Source URLs, retrieval timestamps, short factual excerpts and page hashes are recorded in the JSON trace.')
 c.showPage()
-header('LIVE SOURCE AND RESULTS','Observed catalog offers and deterministic assessment')
+header('DIRECT SUPPLIER RESULTS','Three independent sites, different HC-05 configurations')
 y=718
-y=block(y,'Reviewed source','The source is Makhzan: makhzan.merope.dev/products/b8c70b58-ff9c-406e-8d22-e256089ce7ca-hc-05-bluetooth-module-serial-ttl. Its terms permit work-related comparison within robots guidance, and the reviewed product path is allowed. The current offer list was parsed; the stale-offer disclosure was excluded. No raw page capture is bundled.')
-y=block(y,'Catalog observations','Makers Electronics: 195 EGP; Ampere Electronics: 195 EGP; Most Electronic: 205 EGP; 3D Smart Shop: 250 EGP; RAM Electronics: 295 EGP. For 10 units, known merchandise subtotals are 1,950; 1,950; 2,050; 2,500; and 2,950 EGP. They exclude unknown shipping and tax. These prices were observed on 21 November 2026 and can change.')
-y=block(y,'Run trace','Run ba0e0163e5f8: six of six CrewAI task outputs, 53.92 seconds, local qwen2.5:1.5b-instruct. Actual agent tool calls: one catalog_source_lookup. Orchestrator recovery calls: catalog_evidence_retrieval and deterministic_procurement_assessment. Five products and five needs_verification assessments. No eligible rank or recommendation. See the bundled JSON trace and HTML report.')
-y=block(y,'Uncertainty','Makhzan is an aggregator and flags AI-based offer matching. One Makers supplier page was manually checked and showed 195 EGP in stock, but direct confirmation for the other shops, 10-unit stock, exact configuration, warranty, shipping and tax is missing. Price-only ordering is a comparison aid, not a purchasing decision.')
+y=block(y,'Observed offers','Makers Electronics: HC-05 Bluetooth Module 3.3V, 195 EGP, listed in stock. Ampere Electronics: HC-05 Bluetooth Module, Serial TTL, 195 EGP, page showed 141 in stock. RAM Electronics: HC-05 Original Chip Bluetooth Module - Industrial Grade Module, 295 EGP, stock not evidenced on its product page. These are observations on 21 November 2026, not binding quotes or like-for-like configurations.')
+y=block(y,'Source pages','Makers: makerselectronics.com/product/hc-05-bluetooth-module-3-3v/. Ampere: ampere-electronics.com/product/hc-05-bluetooth-module-serial-ttl/. RAM: ram-e-shop.com/shop/kit-bluetooth-hc05-original-hc-05-original-chip-bluetooth-module-industrial-grade-module-8577. Full HTTPS links appear in docs/ACADEMIC_COMPLETION_RUN.md and the HTML report.')
+y=block(y,'Cost and eligibility','Known merchandise subtotals for ten units: 1,950 EGP, 1,950 EGP and 2,950 EGP. Ampere displays a comma decimal price; the normalized 195.00 value is checked against the literal 195,00 EGP text. All subtotals exclude shipping and tax. Warranty is unstated; listed stock does not establish order acceptance for ten units. All three offers are needs_verification. No eligible weighted ranking or purchase recommendation exists.')
+y=block(y,'CrewAI run','Run 49bba9141fdb: 6/6 sequential task outputs in 43.51 seconds using local qwen2.5:1.5b-instruct. Actual agent-selected tools: reviewed_supplier_lookup and literal_supplier_extraction. One orchestrator call: deterministic_procurement_assessment after the analyst omitted its tool. The specification, verification and reporting agents produced prose; final HTML is generated from validated Python records.')
 c.showPage()
-header('EVALUATION AND REPRODUCTION','Limits, testing and release evidence')
+header('EVALUATION AND LIMITS','Testing, ScrapeGraphAI and reproducibility')
 y=718
-y=block(y,'Automated and real-model tests','The automated suite passed 22/22 tests with no failures or skips. It covers extraction boundaries, safety, cost and eligibility, stable ranking, weight sensitivity, report consistency, crew structure and recovery labeling. The real six-agent run is separate from those fixture tests. A tiny tool-call probe established that CrewAI Task.used_tools may remain zero after a tool body executes; direct tool-body instrumentation is used instead.')
-y=block(y,'ScrapeGraphAI and Tavily','ScrapeGraphAI 2.3.1 ran locally on reviewed HTML with Ollama and telemetry disabled. Its first output included stale rows and truncated titles; a second constrained run produced no accepted tuples. It was not used for final evidence. Tavily was not called because TAVILY_API_KEY was absent. No paid service was used.')
-y=block(y,'Reproduction','Install Python 3.12 dependencies from pyproject.toml, start Ollama, pull qwen2.5:1.5b-instruct, run pytest, then run procurepilot.catalog_crew.run_catalog(). A fresh live page may differ. The bundled trace documents the observed result. Start Streamlit with streamlit run app.py. The old laptop workflow remains available with reviewed URLs or Tavily credentials.')
-y=block(y,'References and release','Makhzan product, terms and robots pages are linked in docs/REAL_SOURCING_VALIDATION.md. CrewAI: docs.crewai.com; Tavily: docs.tavily.com; ScrapeGraphAI: github.com/ScrapeGraphAI/Scrapegraph-ai. Public source: github.com/fariskishtah/procurepilot-ai. No free cloud hosting is verified. No credentials, model weights or third-party raw page captures are distributed.')
-y=block(y,'Conclusion','This release demonstrates a genuine six-agent workflow and an evidence-backed five-offer catalog comparison. Full agent tool selection, direct supplier validation, complete landed costs and the original laptop scenario remain open. The correct procurement outcome is insufficient evidence for a purchase recommendation.')
+y=block(y,'Automated and browser checks','The automated suite passed 26/26 tests, with no failures or skips. It checks source provenance, independent domains, literal extraction, decimal normalization, configuration and price agreement, eligibility, cost, report consistency, safety, storage, crew structure and fallback labels. The real CrewAI run is separate from fixture tests. The actual HTML and Streamlit screens were opened in a browser; final screenshots are bundled.')
+y=block(y,'ScrapeGraphAI','Open-source ScrapeGraphAI 2.3.1 ran locally on reviewed HTML fragments using Ollama. The 1.5B model truncated a product title, while a 3B run once returned all four expected fields and later repeats returned no usable result. Strict validation rejects unsupported values. It is not the production extractor and no reliable accuracy rate is claimed. Tavily was not called because its API key was absent. No paid service was used.')
+y=block(y,'Reproduction and remaining gaps','Install Python 3.12 dependencies, start Ollama, pull qwen2.5:1.5b-instruct, run pytest, then call procurepilot.multisource_crew.run_multisource(). Supplier content and model output may change. The bundled trace records the observed run. The original laptop scenario, complete landed costs, warranty, confirmed ten-unit stock, autonomous assessment selection and free cloud hosting remain open.')
+y=block(y,'References and release','Direct supplier links and robots/terms review are in docs/REAL_SOURCING_VALIDATION.md. CrewAI: docs.crewai.com; Tavily: docs.tavily.com; ScrapeGraphAI: github.com/ScrapeGraphAI/Scrapegraph-ai. Public source: github.com/fariskishtah/procurepilot-ai. Project source is MIT licensed; third-party materials retain their own terms.')
+y=block(y,'Conclusion','ProcurePilot AI now demonstrates genuine independent multi-supplier sourcing and two agent-selected tool calls. It still abstains from recommending a purchase because the evidence does not support complete landed cost or order availability. The academic assignment remains PARTIAL.')
 c.save()
 print(OUT.resolve())

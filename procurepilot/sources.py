@@ -1,5 +1,5 @@
 from __future__ import annotations
-import hashlib, ipaddress, json, os, re, socket
+import ast, hashlib, ipaddress, json, os, re, socket
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 import httpx
@@ -105,7 +105,12 @@ class ScrapeGraphExtractor:
         soup=BeautifulSoup(html,"html.parser")
         catalog_section=soup.select_one('section[aria-labelledby="offers-heading"]')
         source=f"<html><body>{catalog_section}</body></html>" if catalog_section else html
-        prompt=("Extract name, supplier, price and currency from current offers in the first visible offer list only. Exclude stale offers in details. Return JSON." if catalog_section else "Extract product title, brand, model, price, currency, specifications, warranty, availability and seller. Return only fields literally present in the HTML.")
+        if catalog_section:
+            prompt="Extract name, supplier, price and currency from current offers in the first visible offer list only. Exclude stale offers in details. Return JSON."
+        elif soup.select_one("h1") and soup.select_one(".product-price, p.price, .oe_price"):
+            prompt="Return a JSON object with name, price, currency, availability. Copy the complete exact H1 text as name, including any voltage suffix. Use only literal visible text. Price as numeric string."
+        else:
+            prompt="Extract product title, brand, model, price, currency, specifications, warranty, availability and seller. Return only fields literally present in the HTML."
         graph = SmartScraperGraph(prompt=prompt, source=source, config={"llm": {"model": self.model, "base_url": "http://localhost:11434", "model_tokens": 8192, "format": "json", "temperature": 0}, "verbose": False, "headless": True})
         result = graph.run()
         if not isinstance(result, dict): raise ValueError("ScrapeGraph returned no structured object")
@@ -117,5 +122,23 @@ class ScrapeGraphExtractor:
             if not isinstance(candidates,list): candidates=[]
             accepted=[x for x in candidates if isinstance(x,dict) and (x.get("name"),x.get("supplier"),x.get("price"),x.get("currency")) in allowed]
             return {"content":accepted,"rejected_count":len(candidates)-len(accepted),"reference_offer_count":len(expected)}
-        visible = soup.get_text(" ", strip=True).lower()
-        return {k: v for k, v in result.items() if isinstance(v, (str, int, float)) and str(v).lower() in visible}
+        payload=result.get("content",result)
+        if isinstance(payload,str) and len(payload)<=4000:
+            try: payload=json.loads(payload)
+            except ValueError:
+                try: payload=ast.literal_eval(payload)
+                except (ValueError,SyntaxError): payload={}
+        if not isinstance(payload,dict): return {}
+        visible=soup.get_text(" ",strip=True).lower()
+        title=soup.select_one("h1")
+        price_node=soup.select_one(".product-price, p.price, .oe_price")
+        stock_node=soup.select_one(".availability.stock, p.stock")
+        accepted={}
+        if title and payload.get("name")==title.get_text(" ",strip=True): accepted["name"]=payload["name"]
+        for field,node in (("price",price_node),("currency",price_node),("availability",stock_node)):
+            value=payload.get(field)
+            if node and isinstance(value,(str,int,float)) and str(value).lower() in node.get_text(" ",strip=True).lower(): accepted[field]=value
+        # Preserve the previous generic literal filter for other small local snippets.
+        if not title and not price_node and not stock_node:
+            return {k:v for k,v in payload.items() if isinstance(v,(str,int,float)) and str(v).lower() in visible}
+        return accepted

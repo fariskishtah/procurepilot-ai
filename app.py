@@ -7,6 +7,7 @@ import streamlit as st
 from procurepilot.models import Request, RunResult
 from procurepilot.crew import run
 from procurepilot.catalog_crew import run_catalog
+from procurepilot.multisource_crew import run_multisource
 from procurepilot.storage import save, list_runs, load
 from procurepilot.engine import rank
 
@@ -24,7 +25,13 @@ with st.sidebar:
 result: RunResult | None = st.session_state.get("result")
 if page == "Request Builder":
     st.header("Procurement request")
-    st.info("Permitted live catalog demonstration: 10 HC-05 wireless serial modules for NileTech R&D. Catalog prices are observations; direct supplier confirmation and purchase recommendation remain pending.")
+    st.info("Reviewed direct supplier demonstration: 10 HC-05 wireless serial modules for fictional NileTech R&D, budget 3,000 EGP. Supplier pages provide observed unit prices; landed cost and ten-unit stock need confirmation.")
+    if st.button("Run three independent supplier pages", type="primary"):
+        with st.spinner("Checking three supplier pages and running six sequential CrewAI tasks..."):
+            result=run_multisource()
+            save(result)
+            st.session_state.result=result
+        st.success(f"Run {result.run_id} saved. Independent supplier pages: {len({p.source_url.host for p in result.products})}; agent-selected tool calls: {sum(x.get('stage')=='agent_tool' for x in result.task_trace)}.")
     if st.button("Run reviewed Egyptian catalog scenario"):
         with st.spinner("Running live catalog lookup and six sequential CrewAI tasks..."):
             result=run_catalog()
